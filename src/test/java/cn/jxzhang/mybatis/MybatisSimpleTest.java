@@ -7,6 +7,7 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -77,6 +78,22 @@ public class MybatisSimpleTest {
         List<User> users = mapper.selectAll();
         System.out.println(users);
     }
+
+    /**
+     * 测试查询所有
+     */
+    @Test
+    public void test41() {
+        SqlSession sqlSession = factory.openSession();
+        UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+        List<User> users = mapper.selectList(0, DateTime.now().toDate());
+        List<User> users2 = mapper.selectList2(0, DateTime.now().toDate());
+        List<User> users3 = mapper.selectList3(0, DateTime.now().toDate());
+        System.out.println(users);
+        System.out.println(users2);
+        System.out.println(users3);
+    }
+
 
     /**
      * Mapper XML文件
