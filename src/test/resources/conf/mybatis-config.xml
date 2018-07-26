@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <!--
+        1. 读取配置文件：配置文件覆盖顺序
+
+          1) 构建SqlSessionFactory时传递的properties参数
+          2) 配置文件（配置文件仅次于方法传递参数优先级）
+          3) xml中配置的properties参数
+    -->
+    <properties resource="db/db.properties">
+        <!-- 开启配置文件默认值 mybatis 3.4.2 and above-->
+        <property name="org.apache.ibatis.parsing.PropertyParser.enable-default-value" value="true"/> <!-- Enable this feature -->
+
+        <property name="driver" value="com.mysql.jdbc.Driver"/>
+    </properties>
+
+    <!-- 2. Settings配置：改变MyBatis运行时行为 -->
+    <settings>
+
+        <!-- 全局缓存开关 -->
+        <setting name="cacheEnabled" value="true"/>
+
+        <!-- 是否开启延迟加载：关联对象延迟加载 -->
+        <setting name="lazyLoadingEnabled" value="true"/>
+
+        <!-- 是否允许单一语句返回多结果集（需要兼容驱动）。 -->
+        <setting name="multipleResultSetsEnabled" value="true"/>
+
+        <!-- 使用列标签代替列名 -->
+        <setting name="useColumnLabel" value="true"/>
+
+        <!-- 允许 JDBC 支持自动生成主键，需要驱动兼容 -->
+        <setting name="useGeneratedKeys" value="false"/>
+
+        <!-- 	指定 MyBatis 应如何自动映射列到字段或属性。 NONE 表示取消自动映射；PARTIAL 只会自动映射没有定义嵌套结果集映射的结果集。 FULL 会自动映射任意复杂的结果集（无论是否嵌套） -->
+        <setting name="autoMappingBehavior" value="PARTIAL"/>
+
+        <!--
+            指定发现自动映射目标未知列（或者未知属性类型）的行为。
+              NONE: 不做任何反应
+              WARNING: 输出提醒日志 ('org.apache.ibatis.session.AutoMappingUnknownColumnBehavior' 的日志等级必须设置为 WARN)
+              FAILING: 映射失败 (抛出 SqlSessionException)
+         -->
+        <setting name="autoMappingUnknownColumnBehavior" value="WARNING"/>
+
+        <!--
+           配置默认的执行器。
+             SIMPLE 就是普通的执行器；
+             REUSE 执行器会重用预处理语句（prepared statements）；
+             BATCH 执行器将重用语句并执行批量更新。
+         -->
+        <setting name="defaultExecutorType" value="SIMPLE"/>
+
+        <!-- 设置超时时间，它决定驱动等待数据库响应的秒数。 -->
+        <setting name="defaultStatementTimeout" value="25"/>
+
+        <!-- 为驱动的结果集获取数量（fetchSize）设置一个提示值。 -->
+        <setting name="defaultFetchSize" value="100"/>
+
+        <!-- 允许在嵌套语句中使用分页（RowBounds） -->
+        <setting name="safeRowBoundsEnabled" value="false"/>
+
+        <!-- 是否开启自动驼峰命名规则（camel case）映射，即从经典数据库列名 A_COLUMN 到经典 Java 属性名 aColumn 的类似映射。 -->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+
+        <!-- 默认缓存级别：session statement，默认会缓存一个会话中的所有查询 -->
+        <setting name="localCacheScope" value="SESSION"/>
+
+        <!-- 当没有为参数提供特定的 JDBC 类型时，为空值指定 JDBC 类型。 某些驱动需要指定列的 JDBC 类型，多数情况直接用一般类型即可，比如 NULL、VARCHAR 或 OTHER。 -->
+        <setting name="jdbcTypeForNull" value="OTHER"/>
+
+        <!-- 指定哪个对象的方法触发一次延迟加载。-->
+        <setting name="lazyLoadTriggerMethods" value="equals,clone,hashCode,toString"/>
+    </settings>
+
+    <!-- 3. 设置别名，该别名可以在mapper.xml中进行引用，用于减少完全限定名的荣冗余 -->
+    <typeAliases>
+        <typeAlias alias="City" type="cn.jxzhang.mybatis.model.City"/>
+
+        <!-- 也可以配置包名，这样Mybatis就会在该包下搜索可用的JavaBean，默认使用类名首字母小写作为别名，可以通过在
+             类上添加@Alias修改别名，实现自定义别名处理。-->
+        <package name="cn.jxzhang.mybatis"/>
+    </typeAliases>
+
+    <!-- 4. 配置插件 -->
+    <plugins>
+        <plugin interceptor="cn.jxzhang.mybatis.ExamplePlugin">
+            <property name="key1" value="1"/>
+            <property name="key2" value="2"/>
+            <property name="key3" value="3"/>
+        </plugin>
+    </plugins>
+
+    <!-- 5. 环境配置 -->
+    <environments default="test">
+
+        <!-- 1) 开发环境 -->
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+
+
+            <!-- 数据源配置
+                   1) 数据源中的type支持三种类型：POOLED、JNDI、UNPOOLED，一般通常使用自定义数据源（如3. 测试环境中的配置）
+             -->
+            <dataSource type="POOLED">
+                <property name="driver" value="${driver}"/>
+                <property name="url" value="${url:jdbc:mysql://localhost:3306/mybatis?useSSL=false}"/>
+                <property name="username" value="${username}"/>
+                <property name="password" value="${password}"/>
+            </dataSource>
+        </environment>
+
+        <!-- 2) 生产环境 -->
+        <environment id="product">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="${driver}"/>
+                <property name="url" value="${url:jdbc:mysql://localhost:3306/mybatis}"/>
+                <property name="username" value="${username}"/>
+                <property name="password" value="${password}"/>
+            </dataSource>
+        </environment>
+
+        <!-- 3) 测试环境 -->
+        <environment id="test">
+            <transactionManager type="JDBC"/>
+            <dataSource type="cn.jxzhang.mybatis.DruidDataSourceFactory">
+                <property name="driver" value="${driver}"/>
+                <property name="url" value="${url:jdbc:mysql://localhost:3306/mybatis?useSSL=false}"/>
+                <property name="username" value="${username}"/>
+                <property name="password" value="${password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <!-- 6. 映射文件配置 -->
+    <mappers>
+        <!--<mapper resource="mappers/city-mapper.xml"/>-->
+        <package name="cn.jxzhang.mybatis"/>
+    </mappers>
+
+</configuration>
