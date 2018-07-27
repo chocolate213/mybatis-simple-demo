@@ -9,6 +9,22 @@ import java.util.Date;
  */
 public class User {
 
+    public User() {
+    }
+
+    public User(int userId, String userName, int userAge, Date userBirthday) {
+        this.userId = userId;
+        this.userName = userName;
+        this.userAge = userAge;
+        this.userBirthday = userBirthday;
+    }
+
+    public User(String userName, int userAge, Date userBirthday) {
+        this.userName = userName;
+        this.userAge = userAge;
+        this.userBirthday = userBirthday;
+    }
+
     private int userId;
 
     private String userName;

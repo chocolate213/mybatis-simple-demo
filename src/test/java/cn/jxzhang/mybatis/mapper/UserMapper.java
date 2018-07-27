@@ -1,6 +1,7 @@
 package cn.jxzhang.mybatis.mapper;
 
 import cn.jxzhang.mybatis.model.User;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
@@ -29,4 +30,7 @@ public interface UserMapper {
 
     @Select("SELECT * FROM USER where user_age > #{age} and user_birthday < #{date}")
     List<User> selectList2( @Param("age") int age,  @Param("date") Date date);
+
+    @Insert("INSERT INTO USER (user_name, user_age, user_birthday) VALUE (#{userName}, #{userAge}, #{userBirthday})")
+    void insertUser(User user);
 }

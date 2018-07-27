@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.jxzhang.mybatis.mapper.StudentMapper">
+
+
+    <!--
+        id: 在命名空间中的唯一标示符，可以用来引用这条语句
+        parameterType：将会传入这条语句的参数类的完全限定名或别名。这个属性是可选的，因为 MyBatis 可以通过 TypeHandler 推断出具体传入语句的参数，默认值为 unset。
+        resultType：从这条语句中返回的期望类型的类的完全限定名或别名。注意如果是集合情形，那应该是集合可以包含的类型，而不能是集合本身。使用 resultType 或 resultMap，但不能同时使用。
+        resultMap: 外部 resultMap 的命名引用。结果集的映射是 MyBatis 最强大的特性，对其有一个很好的理解的话，许多复杂映射的情形都能迎刃而解。使用 resultMap 或 resultType，但不能同时使用。
+        flushCache: 将其设置为 true，任何时候只要语句被调用，都会导致本地缓存和二级缓存都会被清空，默认值：false。
+        useCache: 将其设置为 true，将会导致本条语句的结果被二级缓存，默认值：对 select 元素为 true。
+        timeout: 这个设置是在抛出异常之前，驱动程序等待数据库返回请求结果的秒数。默认值为 unset（依赖驱动）。
+        fetchSize: 这是尝试影响驱动程序每次批量返回的结果行数和这个设置值相等。默认值为 unset（依赖驱动）。
+        statementType: STATEMENT，PREPARED 或 CALLABLE 的一个。这会让 MyBatis 分别使用 Statement，PreparedStatement 或 CallableStatement，默认值：PREPARED。
+        resultSetType: FORWARD_ONLY，SCROLL_SENSITIVE 或 SCROLL_INSENSITIVE 中的一个，默认值为 unset （依赖驱动）。
+        resultSets: 这个设置仅对多结果集的情况适用，它将列出语句执行后返回的结果集并每个结果集给一个名称，名称是逗号分隔的。
+        databaseId: 如果配置了 databaseIdProvider，MyBatis 会加载所有的不带 databaseId 或匹配当前 databaseId 的语句；如果带或者不带的语句都有，则不带的会被忽略。
+     -->
+    <select
+            id="selectStudentById"
+            resultType="hashmap">
+        select *
+        from student
+        where student_id = #{id}
+    </select>
+
+    <insert id="insertStudent">
+        INSERT INTO student (student_name, student_age)
+            VALUE (#{studentName}, #{studentAge})
+    </insert>
+
+    <!-- 配置自增主键 -->
+    <insert id="insertStudent2" useGeneratedKeys="true" keyColumn="student_id">
+        INSERT INTO student (student_name, student_age)
+            VALUE (#{studentName}, #{studentAge})
+    </insert>
+
+    <update id="updateStudent">
+        UPDATE student
+        SET student_name = #{studentName}
+        WHERE student_id = #{studentId}
+    </update>
+
+    <delete id="deleteStudent">
+        DELETE FROM student
+        WHERE student_id = #{studentId}
+    </delete>
+
+    <sql id="student_column">
+        student_id, student_name, student_age
+    </sql>
+
+    <sql id="student_column2">
+        ${alias}.student_id, ${alias}.student_name, ${alias}.student_age
+    </sql>
+
+    <!-- 测试批量插入 -->
+    <insert id="insertStudents">
+        INSERT INTO student (student_name, student_age) VALUES
+        <foreach collection="list" item="student" separator=",">
+            (#{student.studentName}, #{student.studentAge})
+        </foreach>
+    </insert>
+
+    <select id="selectStudentById3" resultType="Student">
+        SELECT
+        <include refid="student_column"/>
+        FROM student WHERE student_id = #{student_id} ORDER BY student_age;
+    </select>
+
+    <select id="selectStudents2" resultType="map">
+        select
+        <include refid="student_column2">
+            <property name="alias" value="t1"/>
+        </include>
+        ,
+        <include refid="student_column2">
+            <property name="alias" value="t2"/>
+        </include>
+        from student t1
+        cross join student t2
+    </select>
+
+    <!-- 配置自增主键 -->
+    <insert id="insertStudent3" useGeneratedKeys="true" keyColumn="student_id">
+        INSERT INTO student (student_name, student_age)
+            VALUE (#{studentName, javaType=String, jdbcType=VARCHAR}, #{studentAge, javaType=int, jdbcType=NUMERIC})
+    </insert>
+
+    <!-- ${} 将不会使用 PrepareStatement中的？作为占位符-->
+    <select id="selectStudents" resultType="Student">
+        SELECT
+        <include refid="student_column"/>
+        FROM student ORDER BY ${student_age};
+    </select>
+
+</mapper>

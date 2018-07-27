@@ -6,8 +6,4 @@
     <select id="selectCityById" resultType="City">
         select * from city where id = #{id}
     </select>
-
-    <select id="selectCityById" resultType="City">
-        select * from city where id = #{id}
-    </select>
 </mapper>
