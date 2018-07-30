@@ -1,11 +1,11 @@
 package cn.jxzhang.mybatis;
 
 import cn.jxzhang.mybatis.mapper.StudentMapper;
+import cn.jxzhang.mybatis.mapper.TeacherMapper;
 import cn.jxzhang.mybatis.mapper.UserMapper;
-import cn.jxzhang.mybatis.model.City;
-import cn.jxzhang.mybatis.model.Student;
-import cn.jxzhang.mybatis.model.User;
+import cn.jxzhang.mybatis.model.*;
 import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
@@ -35,6 +35,19 @@ public class MybatisSimpleTest {
 
     /**
      * 1. 从 XML 中构建 SqlSessionFactory
+     *
+     *   1) 默认的SqlSession对象会开启一个事务（不会自动提交）
+     *   2）事务的隔离级别将会使用数据源的默认配置
+     *   3) 域处理语句不会被复用，也不会批量处理更新
+     *
+     *   I. 传入true开启自动提交
+     *   SqlSession openSession(boolean autoCommit);
+     *
+     *   II.SqlSession openSession(ExecutorType execType);
+     *       ExecutorType.SIMPLE：这个执行器类型不做特殊的事情。它为每个语句的执行创建一个新的预处理语句。
+     *       ExecutorType.REUSE：这个执行器类型会复用预处理语句。
+     *       ExecutorType.BATCH：这个执行器会批量执行所有更新语句，如果 SELECT 在它们中间执行，必要时请把它们区分开来以保证行为的易读性。
+     *
      */
     @Test
     public void test1() {
@@ -46,6 +59,16 @@ public class MybatisSimpleTest {
         System.out.println(city);
 
         sqlSession.close();
+    }
+
+    @Test
+    public void testRowBounds() {
+        SqlSession sqlSession = factory.openSession();
+
+        List<Object> objects = sqlSession.selectList("cn.jxzhang.mybatis.mapper.StudentMapper.selectStudentList"
+                , new RowBounds(1, 2));
+
+        System.out.println(objects);
     }
 
 
@@ -261,6 +284,268 @@ public class MybatisSimpleTest {
 
         List<Student> students = mapper.selectStudents("student_age");
         System.out.println(students);
+    }
 
+    /**
+     * 测试传递多个参数
+     */
+    @Test
+    public void testSelectStudentByIdAndName() {
+        SqlSession sqlSession = factory.openSession();
+        StudentMapper mapper = sqlSession.getMapper(StudentMapper.class);
+        Student zhangSan = mapper.selectStudentByIdAndName(new Student("zhangSan", 12));
+        System.out.println(zhangSan);
+    }
+
+    /**
+     * 测试传递多个参数
+     */
+    @Test
+    public void testSelectStudentByIdAndName2() {
+        SqlSession sqlSession = factory.openSession();
+        StudentMapper mapper = sqlSession.getMapper(StudentMapper.class);
+        Map<String, Object> map = new HashMap<>();
+        map.put("studentName", "zhangSan");
+        map.put("studentAge", 12);
+        Student zhangSan = mapper.selectStudentByIdAndName2(map);
+        System.out.println(zhangSan);
+    }
+
+    /**
+     * 测试返回Map类型的参数
+     */
+    @Test
+    public void testSelectStudentReturnMap() {
+        SqlSession sqlSession = factory.openSession();
+        StudentMapper mapper = sqlSession.getMapper(StudentMapper.class);
+        Map<String, Object> map = new HashMap<>();
+        map.put("studentName", "zhangSan");
+        map.put("studentAge", 12);
+        Map<String, Object> zhangSan = mapper.selectStudentReturnMap(map);
+        System.out.println(zhangSan);
+    }
+
+    /**
+     * 测试返回Map类型的参数
+     */
+    @Test
+    public void testSelectStudentReturnMap2() {
+        SqlSession sqlSession = factory.openSession();
+        StudentMapper mapper = sqlSession.getMapper(StudentMapper.class);
+        Map<String, Object> map = new HashMap<>();
+        map.put("studentName", "zhangSan");
+        map.put("studentAge", 12);
+        Map<String, Object> zhangSan = mapper.selectStudentReturnMap2(map);
+        System.out.println(zhangSan);
+    }
+
+    /**
+     * 测试ResultMap
+     */
+    @Test
+    public void testSelectStudentReturnResultMap() {
+        SqlSession sqlSession = factory.openSession();
+        StudentMapper mapper = sqlSession.getMapper(StudentMapper.class);
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("studentName", "zhangSan");
+        map.put("studentAge", 12);
+
+        Student zhangSan = mapper.selectStudentReturnResultMap(map);
+        System.out.println(zhangSan);
+    }
+
+    /**
+     * 测试自定义TypeHandler
+     */
+    @Test
+    public void testTypeHandler() {
+        SqlSession sqlSession = factory.openSession();
+        TeacherMapper mapper = sqlSession.getMapper(TeacherMapper.class);
+        Teacher teacher = mapper.selectTeacherById(1);
+        System.out.println(teacher);
+    }
+
+    @Test
+    public void testEnum() {
+        System.out.println(Country.ofCountry(11));
+    }
+
+    /**
+     * 测试ResultMap
+     */
+    @Test
+    public void testSelectStudentReturnResultMap2() {
+        SqlSession sqlSession = factory.openSession();
+        StudentMapper mapper = sqlSession.getMapper(StudentMapper.class);
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("studentName", "zhangSan");
+        map.put("studentAge", 12);
+
+        Student zhangSan = mapper.selectStudentReturnResultMap2(map);
+        System.out.println(zhangSan);
+    }
+
+    /**
+     * 测试复合结果集映射
+     */
+    @Test
+    public void testAssociation() {
+        SqlSession sqlSession = factory.openSession();
+        StudentMapper mapper = sqlSession.getMapper(StudentMapper.class);
+        Map<String, Object> map = new HashMap<>();
+        map.put("studentName", "zhangSan");
+        map.put("studentAge", 12);
+        Student student = mapper.selectStudentWithCity(map);
+        System.out.println(student);
+    }
+
+    /**
+     * 测试复合结果集映射: 一个student对应两个相同的City
+     */
+    @Test
+    public void testAssociation2() {
+        SqlSession sqlSession = factory.openSession();
+        StudentMapper mapper = sqlSession.getMapper(StudentMapper.class);
+        Map<String, Object> map = new HashMap<>();
+        map.put("studentName", "zhangSan");
+        map.put("studentAge", 12);
+        Student student = mapper.selectStudentWithCity2(map);
+        System.out.println(student);
+    }
+
+    /**
+     * 测试复合结果集映射：一对多
+     */
+    @Test
+    public void testAssociation3() {
+        SqlSession sqlSession = factory.openSession();
+        StudentMapper mapper = sqlSession.getMapper(StudentMapper.class);
+        Map<String, Object> map = new HashMap<>();
+        map.put("studentName", "zhangSan");
+        map.put("studentAge", 12);
+        Student student = mapper.selectStudentWithCity3(map);
+        System.out.println(student);
+    }
+
+    /**
+     * 测试ResultMap
+     */
+    @Test
+    public void testSelectStudentReturnResultMap3() {
+        SqlSession sqlSession = factory.openSession();
+        StudentMapper mapper = sqlSession.getMapper(StudentMapper.class);
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("studentName", "zhangSan");
+        map.put("studentAge", 12);
+
+        Student zhangSan = mapper.selectStudentReturnResultMap3(map);
+        System.out.println(zhangSan);
+    }
+
+    /**
+     * 测试ResultMap
+     */
+    @Test
+    public void testFindStudentWithNameLike() {
+        SqlSession sqlSession = factory.openSession();
+        StudentMapper mapper = sqlSession.getMapper(StudentMapper.class);
+
+        List<Student> zhangSan = mapper.findStudentWithNameLike(new Student("name1%", 1));
+        System.out.println(zhangSan);
+    }
+
+    /**
+     * 测试ResultMap
+     */
+    @Test
+    public void testFindStudentWithNameLike2() {
+        SqlSession sqlSession = factory.openSession();
+        StudentMapper mapper = sqlSession.getMapper(StudentMapper.class);
+
+        Student student = new Student();
+        student.setStudentAge(1);
+        List<Student> zhangSan = mapper.findStudentWithNameLike(student);
+        System.out.println(zhangSan);
+    }
+
+    /**
+     * 测试ResultMap
+     */
+    @Test
+    public void testFindStudentWithNameLike3() {
+        SqlSession sqlSession = factory.openSession();
+        StudentMapper mapper = sqlSession.getMapper(StudentMapper.class);
+
+        Student student = new Student();
+        student.setStudentAge(1);
+        List<Student> zhangSan = mapper.findStudentWithNameLike2(student);
+        System.out.println(zhangSan);
+    }
+
+    /**
+     * 测试ResultMap
+     */
+    @Test
+    public void testFindStudentWithWhere() {
+        SqlSession sqlSession = factory.openSession();
+        StudentMapper mapper = sqlSession.getMapper(StudentMapper.class);
+
+        Student student = new Student();
+        student.setStudentAge(1);
+        student.setStudentName("name1");
+        List<Student> zhangSan = mapper.findStudentWithWhere(student);
+        System.out.println(zhangSan);
+    }
+
+    @Test
+    public void updateStudentWithSet() {
+        SqlSession sqlSession = factory.openSession();
+        StudentMapper mapper = sqlSession.getMapper(StudentMapper.class);
+
+        Student student = new Student();
+        student.setStudentAge(12);
+        student.setStudentName("name11111111");
+        student.setStudentId(13);
+        int i = mapper.updateStudentWithSet(student);
+        System.out.println(i);
+    }
+
+    @Test
+    public void testFindStudentWithForeach() {
+        SqlSession sqlSession = factory.openSession();
+        StudentMapper mapper = sqlSession.getMapper(StudentMapper.class);
+
+        List<Integer> ids = Arrays.asList(2, 4, 5, 6);
+        List<Student> zhangSan = mapper.findStudentWithForEach(ids);
+        System.out.println(zhangSan);
+    }
+
+
+    @Test
+    public void testFindStudentWithForEachAndMapParam() {
+        SqlSession sqlSession = factory.openSession();
+        StudentMapper mapper = sqlSession.getMapper(StudentMapper.class);
+
+        Map<Integer, Integer> map = new HashMap<>();
+
+        map.put(2, 4);
+        map.put(5, 6);
+
+        List<Student> zhangSan = mapper.findStudentWithForEachAndMapParam(map);
+        System.out.println(zhangSan);
+    }
+
+    @Test
+    public void testFindStudentWithBindProperty() {
+        SqlSession sqlSession = factory.openSession();
+        StudentMapper mapper = sqlSession.getMapper(StudentMapper.class);
+        Student student = new Student();
+        student.setStudentName("name");
+        List<Student> studentWithNameLike = mapper.findStudentWithBindProperty(student);
+
+        System.out.println(studentWithNameLike);
     }
 }

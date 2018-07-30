@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 命名空间要与Mapper对象全类名一致 -->
+<mapper namespace="cn.jxzhang.mybatis.mapper.TeacherMapper">
+    <resultMap id="teacherResultMap" type="cn.jxzhang.mybatis.model.Teacher">
+        <id property="teacherId" column="teacherId" javaType="Integer" jdbcType="INTEGER" typeHandler="cn.jxzhang.mybatis.handler.MyIntegerTypeHandler"/>
+
+        <!-- Gender为枚举类型，如果没有显式指定TypeHandler，MyBatis将会按照已经注册的TypeHandler处理该类型，也就是说typeHandler即使不指定也可以正常处理;-->
+        <result property="teacherGender" column="teacher_gender" typeHandler="cn.jxzhang.mybatis.handler.GenderTypeHandler"/>
+
+        <!-- Subject也为枚举类型，但是数据库中的返回结果与枚举类型中定义的相同，MyBatis将会按照名字映射到指定的枚举类型中
+            注意：在没有注册对应的类型处理器时，MyBatis只会按照名字来映射枚举类型，否则会抛出异常
+        -->
+        <result property="teacherSubject" column="teacher_subject"/>
+    </resultMap>
+
+    <select id="selectTeacherById" resultMap="teacherResultMap">
+        SELECT * FROM TEACHER WHERE teacher_id = #{param1}
+    </select>
+</mapper>

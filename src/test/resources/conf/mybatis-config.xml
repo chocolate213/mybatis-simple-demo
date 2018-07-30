@@ -64,7 +64,7 @@
         <!-- 允许在嵌套语句中使用分页（RowBounds） -->
         <setting name="safeRowBoundsEnabled" value="false"/>
 
-        <!-- 是否开启自动驼峰命名规则（camel case）映射，即从经典数据库列名 A_COLUMN 到经典 Java 属性名 aColumn 的类似映射。 -->
+        <!-- 是否开启自动驼峰命名规则（camel case）映射，即从经典数据库列名 A_COLUMN 到经典 Java 属性名 aColumn 的类似映射。该配置默认为关闭, 需要手动开启 -->
         <setting name="mapUnderscoreToCamelCase" value="true"/>
 
         <!-- 默认缓存级别(一级缓存)：session statement，默认会缓存一个会话中的所有查询 -->
@@ -87,6 +87,10 @@
              类上添加@Alias修改别名，实现自定义别名处理。-->
         <package name="cn.jxzhang.mybatis"/>
     </typeAliases>
+
+    <typeHandlers>
+        <typeHandler handler="cn.jxzhang.mybatis.handler.GenderTypeHandler"/>
+    </typeHandlers>
 
     <!-- 4. 配置插件 -->
     <plugins>
@@ -142,7 +146,9 @@
     <mappers>
         <mapper resource="mappers/city-mapper.xml"/>
         <mapper resource="mappers/student-mapper.xml"/>
+        <mapper resource="mappers/teacher-mapper.xml"/>
         <!--<package name="cn.jxzhang.mybatis.mapper"/>-->
     </mappers>
+
 
 </configuration>
