@@ -1,20 +1,22 @@
 package cn.jxzhang.mybatis.mapper;
 
 import cn.jxzhang.mybatis.model.Student;
+import cn.jxzhang.mybatis.model.Teacher;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.session.RowBounds;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * StudentMapper
  *
- *
- * 你可以传递多个参数给一个映射器方法。如果你这样做了，默认情况下它们将会以 "param"
+ * 1. 可以传递多个参数给一个映射器方法。如果你这样做了，默认情况下它们将会以 "param"
  * 字符串紧跟着它们在参数列表中的位置来命名，比如：#{param1}、#{param2}等。如果
  * 你想改变参数的名称（只在多参数情况下），那么你可以在参数上使用 @Param("paramName") 注解。
  *
- * 你也可以给方法传递一个 RowBounds 实例来限制查询结果。
+ * 2. 可以给方法传递一个 RowBounds 实例来限制查询结果。
  *
  * @author zhangjiaxing
  * @version 1.0
@@ -81,4 +83,16 @@ public interface StudentMapper {
     int updateStudentWithSet(Student student);
 
     List<Student> findStudentWithBindProperty(Student student);
+
+    List<Student> findPagedStudentList(Student student, RowBounds bounds);
+
+    List<Map<String, Integer>> testFindStudentListReturnHashMap(List<String> names);
+
+    List<Map<String, Integer>> testFindStudentListReturnHashMap(Set<String> names);
+
+    Student testAutoMapping(Integer id);
+
+    int testBindBySingleParam(@Param("name") String name);
+
+    int queryWithStudentAndTeacher(@Param("student") Student student, @Param("teacher")Teacher teacher);
 }

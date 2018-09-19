@@ -507,16 +507,69 @@
     <!-- test foreach with map
      map: index 为key item 为value
      set&list：index为迭代次数
+
+     判断集合是否为空：list.size() > 0
+
+
      -->
     <select id="findStudentWithForEachAndMapParam" resultType="Student">
         SELECT * FROM student WHERE student_id in
-        <foreach collection="studentIds" separator="," open="(" close=")" item="key" index="value">
-            #{value}
+
+        <if test="studentIds != null AND studentIds.size() > 0">
+            <where>
+                student_id in
+                <foreach collection="studentIds" separator="," open="(" close=")" item="key" index="value">
+                    #{value}
+                </foreach>
+            </where>
+        </if>
+
+    </select>
+
+    <select id="findStudentWithBindProperty" resultType="int">
+        <bind name="name" value="'%' + _parameter.getStudentName() + '%'"/>
+        SELECT * FROM student WHERE student_name like #{name}
+    </select>
+
+    <select id="findPagedStudentList" resultType="Student">
+        SELECT * FROM STUDENT
+    </select>
+
+    <select id="testFindStudentListReturnHashMap" resultType="hashMap">
+        SELECT student_name, student_age FROM STUDENT WHERE student_name in
+        <foreach collection="collection" open="(" close=")" separator="," item="name">
+            #{name}
         </foreach>
     </select>
 
-    <select id="findStudentWithBindProperty" resultType="Student">
-        <bind name="name" value="'%' + _parameter.getStudentName() + '%'"/>
-        SELECT * FROM student WHERE student_name like #{name}
+    <!--
+        autoMapping：配置是否自动映射resultMap中不存在但是在JavaBean中存在的字段
+         true（默认值）：自动映射resultMap中不存在的字段
+         false：只映射手动配置的字段，其他字段不做映射
+
+        注意：如果关闭自动映射，数据库并没有返回手动映射中存在的字段，本次查询结果将会返回null
+     -->
+    <resultMap id="studentAutoMapping" type="Student" autoMapping="false">
+        <result property="studentName" column="student_name"/>
+        <result property="studentId" column="student_id"/>
+    </resultMap>
+
+    <select id="testAutoMapping" resultMap="studentAutoMapping">
+        SELECT student_id FROM STUDENT WHERE student_id = #{arg0}
+    </select>
+
+    <select id="testBindBySingleParam" resultType="int">
+        <bind name="nameLike" value="name == null ? '' : '%' + name + '%'"/>
+        SELECT count(*) from student
+        <if test="name != null &amp;&amp; name != ''">
+            <where>
+                student_name like #{nameLike}
+            </where>
+        </if>
+    </select>
+
+    <select id="queryWithStudentAndTeacher" resultType="int">
+        SELECT count(*) from student
+        where student_age = #{student.studentAge} AND student_id = #{teacher.teacherId}
     </select>
 </mapper>

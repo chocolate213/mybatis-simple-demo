@@ -16,9 +16,13 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 /**
  * MybatisSimpleTest
+ *
+ * 注意：Mybatis返回集合的时候如果没有查到数据将会返回空集合，而不是null
  *
  * @author zhangjiaxing005@ke.com
  */
@@ -543,9 +547,96 @@ public class MybatisSimpleTest {
         SqlSession sqlSession = factory.openSession();
         StudentMapper mapper = sqlSession.getMapper(StudentMapper.class);
         Student student = new Student();
-        student.setStudentName("name");
+        student.setStudentName("n");
         List<Student> studentWithNameLike = mapper.findStudentWithBindProperty(student);
 
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(10, 100, 1000, TimeUnit.DAYS, new LinkedBlockingDeque<>(1000), new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable r) {
+                return null;
+            }
+        });
+
         System.out.println(studentWithNameLike);
+    }
+
+    @Test
+    public void testFindPagedStudentList() {
+        SqlSession sqlSession = factory.openSession();
+
+        StudentMapper mapper = sqlSession.getMapper(StudentMapper.class);
+        RowBounds rowBounds = new RowBounds(1, 1);
+        List<Student> pagedStudentList = mapper.findPagedStudentList(new Student(), rowBounds);
+        System.out.println(pagedStudentList);
+    }
+
+    @Test
+    public void testReturnMapList() {
+        SqlSession sqlSession = factory.openSession();
+        StudentMapper mapper = sqlSession.getMapper(StudentMapper.class);
+        List<Map<String, Integer>> maps = mapper.testFindStudentListReturnHashMap(new HashSet<>(Arrays.asList("zhangSan", "liSi")));
+        System.out.println(maps);
+    }
+
+    @Test
+    public void testAutoMap() {
+        SqlSession sqlSession = factory.openSession();
+        StudentMapper mapper = sqlSession.getMapper(StudentMapper.class);
+        Student student = mapper.testAutoMapping(1);
+        System.out.println(student);
+    }
+
+    @Test
+    public void testVoidClass() {
+        Class<Void> voidClass = void.class;
+        System.out.println(voidClass);
+    }
+
+    @Test
+    public void testEmptyListSteam() {
+        List<String> strings = new ArrayList<>();
+
+        Map<String, String> collect = strings.stream()
+                .map(String::toUpperCase)
+                .collect(Collectors.toMap(k -> k, v -> v));
+
+
+        System.out.println(collect);
+    }
+
+    @Test
+    public void testBind() {
+        SqlSession sqlSession = factory.openSession();
+
+        StudentMapper mapper = sqlSession.getMapper(StudentMapper.class);
+
+        int n = mapper.testBindBySingleParam("n");
+        System.out.println(n);
+    }
+
+    /**
+     * 违反唯一性约束将会抛出com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException
+     * 异常。
+     */
+    @Test
+    public void testException() {
+        SqlSession sqlSession = factory.openSession();
+
+        StudentMapper mapper = sqlSession.getMapper(StudentMapper.class);
+
+        mapper.insertStudent(new Student("zhangSan", 22));
+
+        sqlSession.commit();
+    }
+
+    @Test
+    public void testQueryWithStudentAndTeacher() {
+        SqlSession sqlSession = factory.openSession();
+
+        StudentMapper mapper = sqlSession.getMapper(StudentMapper.class);
+
+        int zhangSan = mapper.queryWithStudentAndTeacher(new Student(123, "zhangSan", 112), new Teacher(1));
+
+        System.out.println(zhangSan);
     }
 }

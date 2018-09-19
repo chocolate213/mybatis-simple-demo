@@ -15,6 +15,10 @@ public class Teacher {
 
     private Country teacherCountry;
 
+    public Teacher(int teacherId) {
+        this.teacherId = teacherId;
+    }
+
     public Country getTeacherCountry() {
         return teacherCountry;
     }

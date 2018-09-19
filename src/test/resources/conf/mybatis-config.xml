@@ -114,8 +114,8 @@
             <dataSource type="POOLED">
                 <property name="driver" value="${driver}"/>
                 <property name="url" value="${url:jdbc:mysql://localhost:3306/mybatis2?useSSL=false}"/>
-                <property name="username" value="${username}"/>
-                <property name="password" value="${password}"/>
+                <property name="username" value="${home.username}"/>
+                <property name="password" value="${home.password}"/>
             </dataSource>
         </environment>
 
@@ -125,8 +125,8 @@
             <dataSource type="POOLED">
                 <property name="driver" value="${driver}"/>
                 <property name="url" value="${url:jdbc:mysql://localhost:3306/mybatis2}"/>
-                <property name="username" value="${username}"/>
-                <property name="password" value="${password}"/>
+                <property name="username" value="${home.username}"/>
+                <property name="password" value="${home.password}"/>
             </dataSource>
         </environment>
 
@@ -135,9 +135,9 @@
             <transactionManager type="JDBC"/>
             <dataSource type="cn.jxzhang.mybatis.DruidDataSourceFactory">
                 <property name="driver" value="${driver}"/>
-                <property name="url" value="${url:jdbc:mysql://localhost:3306/mybatis2?useSSL=false}"/>
-                <property name="username" value="${username}"/>
-                <property name="password" value="${password}"/>
+                <property name="url" value="${url:jdbc:mysql://localhost:3306/mybatis?useSSL=false}"/>
+                <property name="username" value="${work.username}"/>
+                <property name="password" value="${work.password}"/>
             </dataSource>
         </environment>
     </environments>
